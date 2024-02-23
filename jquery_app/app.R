@@ -11,6 +11,16 @@ library(shinydashboard)
 
 # Define UI
 ui <- fluidPage(
+  
+  tags$head(
+    tags$script(src = "https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"),
+    tags$link(
+      rel = "stylesheet",
+      href = "https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css"
+    ),
+    tags$script(src = "script.js")
+  ),
+  
   titlePanel("Data Pattern Visualization with JavaScript Button"),
   sidebarLayout(
     sidebarPanel(
@@ -122,7 +132,13 @@ ui <- fluidPage(
     
   ),
     mainPanel(
-      plotOutput("contentsPlot")
+      plotOutput(
+        "plot"
+      ) %>% tagAppendAttributes(
+        # Calling the function which has been defined in the 
+        # external script
+        onclick = "alertme('plot')"
+      )
     )
   )
 )
@@ -149,13 +165,14 @@ server <- function(input, output) {
     input$text_attr
   })
   
-  output$contentsPlot <- renderPlot({
+  output$plot <- renderPlot({
     req(input$file1)
     df <- read.csv(input$file1$datapath, header = input$header)
     if (is.data.frame(df) && ncol(df) >= 2) {
       ggplot(df, aes(x=df[,1], y=df[,2])) + geom_point() + theme_minimal() +
         labs(x=names(df)[1], y=names(df)[2], title="Data Pattern Visualization")
     }
+    #plot(iris)
   })
 }
 
